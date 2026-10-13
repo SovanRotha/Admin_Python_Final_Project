@@ -1,16 +1,28 @@
-# React + Vite
+# Admin Auth Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+This frontend expects a FastAPI backend running at the configured API base URL.
 
-Currently, two official plugins are available:
+## Environment setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Create a `.env` file in the project root with:
 
-## React Compiler
+```bash
+VITE_API_BASE_URL=http://localhost:8000
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+This is used for the login and register requests:
 
-## Expanding the Oxlint configuration
+- POST /api/v1/auth/register
+- POST /api/v1/auth/login
+- POST /api/v1/destinations
+- POST /api/v1/places
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+The admin page includes a destination form matching the API fields: `name`, `country`, `country_code`, `description`, `image`, `currency`, `language`, `timezone`, `best_time`, and numeric `average_daily_cost`. The place form matches `destination_id`, `name`, `category`, `description`, `address`, `latitude`, `longitude`, `estimated_cost`, `opening_time`, `closing_time`, `best_time_to_visit`, `website`, `rating`, and `status`. These endpoints must enforce the admin allowlist on the backend.
+
+The backend must also enforce:
+
+- user is registered
+- user is active
+- user email is in the configured admin allowlist
+
+The app will not use a fake demo token anymore; it will only authenticate against the configured backend.
