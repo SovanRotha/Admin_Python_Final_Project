@@ -2,8 +2,8 @@ import { request } from './httpClient.js'
 
 const ADMIN_ENDPOINT = '/api/v1/admin'
 const REPORTS_ENDPOINT = '/api/v1/reports'
-const DESTINATIONS_ENDPOINT = '/api/v1/destinations'
-const PLACES_ENDPOINT = '/api/v1/places'
+const DESTINATIONS_ENDPOINT = `${ADMIN_ENDPOINT}/destinations`
+const PLACES_ENDPOINT = `${ADMIN_ENDPOINT}/places`
 
 export const authLogin = (payload) =>
   request('/api/v1/auth/login', {
@@ -47,15 +47,45 @@ export const fetchAdminSettings = () => request(`${ADMIN_ENDPOINT}/settings`)
 export const fetchAdminAuditLogs = (params = {}) =>
   request(`${ADMIN_ENDPOINT}/audit-logs`, { query: params })
 
+export const fetchAdminDestinations = (params = {}) =>
+  request(DESTINATIONS_ENDPOINT, { query: params })
+
+export const fetchAdminDestinationById = (destinationId) =>
+  request(`${DESTINATIONS_ENDPOINT}/${encodeURIComponent(destinationId)}`)
+
 export const createDestination = (payload) =>
   request(DESTINATIONS_ENDPOINT, {
     method: 'POST',
     body: payload,
   })
 
+export const updateDestination = (destinationId, payload) =>
+  request(`${DESTINATIONS_ENDPOINT}/${encodeURIComponent(destinationId)}`, {
+    method: 'PATCH',
+    body: payload,
+  })
+
+export const updateDestinationStatus = (destinationId, status) =>
+  request(`${DESTINATIONS_ENDPOINT}/${encodeURIComponent(destinationId)}/status`, {
+    method: 'PATCH',
+    body: { status },
+  })
+
+export const fetchAdminPlaces = (params = {}) =>
+  request(PLACES_ENDPOINT, { query: params })
+
+export const fetchAdminPlaceById = (placeId) =>
+  request(`${PLACES_ENDPOINT}/${encodeURIComponent(placeId)}`)
+
 export const createPlace = (payload) =>
   request(PLACES_ENDPOINT, {
     method: 'POST',
+    body: payload,
+  })
+
+export const updatePlace = (placeId, payload) =>
+  request(`${PLACES_ENDPOINT}/${encodeURIComponent(placeId)}`, {
+    method: 'PATCH',
     body: payload,
   })
 
@@ -77,8 +107,15 @@ const adminApi = {
   reviewReport: reviewAdminReport,
   getSettings: fetchAdminSettings,
   listAuditLogs: fetchAdminAuditLogs,
+  listDestinations: fetchAdminDestinations,
+  getDestinationById: fetchAdminDestinationById,
   createDestination,
+  updateDestination,
+  updateDestinationStatus,
+  listPlaces: fetchAdminPlaces,
+  getPlaceById: fetchAdminPlaceById,
   createPlace,
+  updatePlace,
   submitReport,
 }
 
