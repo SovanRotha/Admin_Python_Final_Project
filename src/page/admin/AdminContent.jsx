@@ -19,6 +19,7 @@ function AdminContent({
   onPlaceCreated,
   onReportPageChange,
   onReportReview,
+  onRefresh,
   onSearch,
   onUserPageChange,
   onUserStatusChange,
@@ -31,7 +32,20 @@ function AdminContent({
   userPage,
 }) {
   if (activeTab === 'dashboard') {
-    return <DashboardAnalytics dashboard={data?.dashboard} userCount={data?.userCount} />
+    return (
+      <DashboardAnalytics
+        dashboard={data?.dashboard}
+        onRefresh={onRefresh}
+        onReportPageChange={onReportPageChange}
+        onReportReview={onReportReview}
+        pendingReportId={pendingReportId}
+        reportError={data?.reportError}
+        reportItems={data?.reportItems}
+        reportPage={reportPage}
+        reportTotal={data?.reportTotal}
+        userCount={data?.userCount}
+      />
+    )
   }
 
   if (activeTab === 'destinations') {

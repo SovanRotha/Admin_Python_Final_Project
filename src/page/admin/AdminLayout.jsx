@@ -48,8 +48,12 @@ function AdminLayout({
       <main className="adm-main">
         <header className="adm-header">
           <div>
-            <h2>{activePage.label}</h2>
-            <p>{activePage.description}</p>
+            <h2>{activeTab === 'dashboard' ? 'TripOS Mission Control & Admin Hub' : activePage.label}</h2>
+            <p>
+              {activeTab === 'dashboard'
+                ? 'Global platform infrastructure monitor, traveler telemetry, automated OCR parser diagnostics, and crowd-sourced itinerary data verifications.'
+                : activePage.description}
+            </p>
           </div>
           <div className="adm-header__actions">
             <button

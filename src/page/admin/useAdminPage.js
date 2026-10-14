@@ -36,7 +36,25 @@ function useAdminPage() {
             adminApi.getDashboard(),
             adminApi.getUserCount(),
           ])
-          nextData = { dashboard, userCount: userCount?.count }
+          let reportItems = []
+          let reportTotal = 0
+          let reportError = ''
+
+          try {
+            const result = await adminApi.listReports({ page: reportPage, page_size: 4 })
+            reportItems = getCollection(result)
+            reportTotal = getTotal(result, reportItems)
+          } catch (reportsLoadError) {
+            reportError = reportsLoadError.message || 'Could not load content reports.'
+          }
+
+          nextData = {
+            dashboard,
+            userCount: userCount?.count,
+            reportItems,
+            reportTotal,
+            reportError,
+          }
         } else if (activeTab === 'destinations' || activeTab === 'places') {
           nextData = {}
         } else if (activeTab === 'users') {

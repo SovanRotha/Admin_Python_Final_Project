@@ -25,7 +25,7 @@ function AdminPage({ onLogout }) {
       >
         {admin.loading ? (
           <LoadingSkeleton label={activePage.label.toLowerCase()} />
-        ) : admin.error ? (
+        ) : admin.error && admin.activeTab !== 'dashboard' ? (
           <div className="adm-card">
             <EmptyState
               title="Unable to load this section"
@@ -48,6 +48,7 @@ function AdminPage({ onLogout }) {
             onPlaceCreated={admin.handlePlaceCreated}
             onReportPageChange={admin.setReportPage}
             onReportReview={admin.handleReportReview}
+            onRefresh={admin.refresh}
             onSearch={admin.handleUserSearch}
             onUserPageChange={admin.setUserPage}
             onUserStatusChange={admin.handleUserStatusChange}
