@@ -9,6 +9,43 @@ const getStoredToken = () => {
   }
 }
 
+const formatApiError = (payload) => {
+  const detail = typeof payload === 'object' && payload !== null
+    ? payload.detail ?? payload.message
+    : payload
+
+  if (Array.isArray(detail)) {
+    return detail
+      .map((item) => {
+        if (typeof item === 'string') {
+          return item
+        }
+
+        if (!item || typeof item !== 'object') {
+          return ''
+        }
+
+        const location = Array.isArray(item.loc)
+          ? item.loc.filter((part) => part !== 'body').join('.')
+          : ''
+        const message = typeof item.msg === 'string' ? item.msg : ''
+        return location && message ? `${location}: ${message}` : message || location
+      })
+      .filter(Boolean)
+      .join('; ')
+  }
+
+  if (typeof detail === 'string') {
+    return detail
+  }
+
+  if (detail && typeof detail === 'object') {
+    return JSON.stringify(detail)
+  }
+
+  return ''
+}
+
 export async function request(path, { query, body, ...options } = {}) {
   if (!API_BASE_URL) {
     throw new Error('API is not configured. Set VITE_API_BASE_URL to your FastAPI base URL, for example http://localhost:8000.')
@@ -52,9 +89,7 @@ export async function request(path, { query, body, ...options } = {}) {
     : await response.text()
 
   if (!response.ok) {
-    const message = typeof payload === 'string'
-      ? payload
-      : payload?.detail ?? payload?.message
+    const message = formatApiError(payload)
 
     throw new Error(message || `Request failed (${response.status} ${response.statusText})`)
   }
