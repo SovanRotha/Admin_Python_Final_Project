@@ -27,6 +27,10 @@ The admin API client uses these controller-backed destination and place routes:
 
 The FastAPI router must register these paths and protect them with the admin authorization dependency.
 
+The user list also provides a confirmed permanent-delete action through
+`DELETE /api/v1/admin/users/{user_id}`. The backend removes linked account data
+and prevents an admin from deleting their own account.
+
 The backend must also enforce:
 
 - user is registered

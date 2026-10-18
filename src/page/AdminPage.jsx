@@ -51,7 +51,9 @@ function AdminPage({ onLogout }) {
             onRefresh={admin.refresh}
             onSearch={admin.handleUserSearch}
             onUserPageChange={admin.setUserPage}
+            onUserDelete={admin.handleUserDelete}
             onUserStatusChange={admin.handleUserStatusChange}
+            pendingDeleteUserId={admin.pendingDeleteUserId}
             pendingReportId={admin.pendingReportId}
             pendingUserId={admin.pendingUserId}
             placeRefreshKey={admin.placeRefreshKey}

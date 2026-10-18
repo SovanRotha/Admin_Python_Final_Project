@@ -1,21 +1,13 @@
 import { useMemo, useState } from 'react'
 import {
-  Activity,
-  ArrowDownRight,
-  ArrowRight,
-  ArrowUpRight,
   BarChart3,
-  Building2,
   Check,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   CircleHelp,
   Cloud,
-  Database,
   FileCheck2,
   FileSearch,
-  Globe2,
   Map,
   MapPin,
   MoreHorizontal,
@@ -25,158 +17,67 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
-  TicketCheck,
   Users,
-  Wifi,
   X,
 } from 'lucide-react'
 import { getInitials, getValue } from './admin/adminUtils.js'
 
-const sampleIncidents = [
-  {
-    id: 'EV-10482',
-    place: 'Grand Palace Perimeter',
-    location: 'Bangkok, Thailand',
-    category: 'Transfer Scam Reported',
-    reporter: 'Liam Vance',
-    handle: '@liamvance',
-    status: 'Pending review',
-    severity: 'High',
-    icon: 'landmark',
-    description: 'A reported tuk-tuk transfer offer near the main visitor entrance.',
-  },
-  {
-    id: 'EV-10479',
-    place: 'Chiang Mai Sunday Walking Street',
-    location: 'Chiang Mai, Thailand',
-    category: 'Relocation / Closed Place',
-    reporter: 'Mayumi K.',
-    handle: '@mayumi.travels',
-    status: 'Pending review',
-    severity: 'Medium',
-    icon: 'market',
-    description: 'Traveler report says several listed vendor locations have moved.',
-  },
-  {
-    id: 'EV-10473',
-    place: 'Rassada Pier → Koh Phi Phi Ferry',
-    location: 'Phuket, Thailand',
-    category: 'Timetable Inaccurate',
-    reporter: 'Phuket Marine Hub',
-    handle: '@phuketmarine',
-    status: 'Verified & ready',
-    severity: 'Low',
-    icon: 'ferry',
-    description: 'A ferry departure time was checked against the operator timetable.',
-  },
-  {
-    id: 'EV-10466',
-    place: 'Jay Fai Michelin Crab Omelette',
-    location: 'Bangkok, Thailand',
-    category: 'Outdated / Fraudulent Pricing',
-    reporter: 'Marc Dupont',
-    handle: '@marcdupont',
-    status: 'Pending review',
-    severity: 'Medium',
-    icon: 'food',
-    description: 'A traveler flagged a menu price that may no longer be current.',
-  },
-]
+const REGION_COLORS = {
+  southeast_asia: '#2563eb',
+  east_asia: '#7c3aed',
+  europe_uk: '#f59e0b',
+  other: '#94a3b8',
+}
 
-const sampleOversight = [
-  {
-    ...sampleIncidents[0],
-    id: 'DST-0021',
-    place: 'Bangkok City Collection',
-    category: 'Destination content review',
-    status: 'Verified & ready',
-    severity: 'Low',
-    description: 'Destination information and traveler guidance are up to date.',
-  },
-  {
-    ...sampleIncidents[1],
-    id: 'PLC-0318',
-    place: 'Chiang Mai Night Market',
-    category: 'Place listing needs review',
-    status: 'Pending review',
-    severity: 'Medium',
-  },
-  {
-    ...sampleIncidents[2],
-    id: 'PLC-0294',
-    place: 'Rassada Pier',
-    category: 'Transport listing verification',
-    status: 'Verified & ready',
-    severity: 'Low',
-  },
-  {
-    ...sampleIncidents[3],
-    id: 'PLC-0215',
-    place: 'Jay Fai',
-    category: 'Pricing freshness alert',
-    status: 'Pending review',
-    severity: 'High',
-  },
-]
+const OCR_CATEGORY_COLORS = {
+  flight: '#2563eb',
+  hotel: '#7c3aed',
+  transit: '#0f9f84',
+  expense: '#f59e0b',
+  other: '#94a3b8',
+}
 
 const kpiDefinitions = [
   {
     title: 'Total Registered Travelers',
-    value: '148,290',
-    subtitle: '+1,210 onboarding through referral links',
-    change: '+12.4%',
+    value: '—',
+    subtitle: 'Registered platform accounts',
     icon: Users,
     tone: 'blue',
     keywords: ['user', 'traveler', 'account'],
   },
   {
     title: 'Active Trips Managed',
-    value: '14,820',
-    subtitle: '$31.6M aggregate travel budget involved',
+    value: '—',
+    subtitle: 'Trips in planning, upcoming, or ongoing status',
     icon: Plane,
     tone: 'violet',
     keywords: ['trip', 'itinerary'],
   },
   {
     title: 'AI Screenshot Parse Jobs',
-    value: '94,120',
-    subtitle: '98.6% auto-resolve success rate',
+    value: '—',
+    subtitle: 'Persisted screenshot extraction jobs',
     icon: FileSearch,
     tone: 'amber',
     keywords: ['ocr', 'parse', 'screenshot', 'ticket'],
   },
   {
-    title: 'Destination & Place Catalog',
-    value: '1,420',
-    subtitle: 'Curated sites across 88,920 landmarks',
+    title: 'Destination Catalog',
+    value: '—',
+    subtitle: 'Destinations in the catalog',
     icon: Map,
     tone: 'green',
-    keywords: ['destination', 'place', 'catalog'],
+    keywords: ['destination catalog'],
   },
-]
-
-const statusMetrics = [
-  { label: 'FX RATES FEED', value: 'ECD & SuperRich', note: 'Updated 3m ago', icon: Globe2, tone: 'green' },
-  { label: 'OCR QUEUE LATENCY', value: '0.8s avg/page', note: 'Active', icon: Activity, tone: 'blue' },
-  { label: 'ZERO-KNOWLEDGE VAULT', value: 'Worker: Optimal', note: 'Encrypted', icon: ShieldCheck, tone: 'violet' },
-  { label: 'EMBEDDINGS SYNC', value: 'All 14 Gateways', note: '100% OK', icon: Wifi, tone: 'green' },
-]
-
-const chartMonths = [
-  { month: 'Jan', sea: 42, east: 28, europe: 18 },
-  { month: 'Feb', sea: 54, east: 36, europe: 25 },
-  { month: 'Mar', sea: 48, east: 43, europe: 32 },
-  { month: 'Apr', sea: 68, east: 48, europe: 39 },
-  { month: 'May', sea: 58, east: 55, europe: 43 },
-  { month: 'Jun', sea: 76, east: 62, europe: 50 },
-  { month: 'Jul', sea: 88, east: 73, europe: 61 },
-]
-
-const documentKinds = [
-  { label: 'Flight Boarding Passes', value: 42, color: '#2563eb' },
-  { label: 'Hotel & Villa Bookings', value: 31, color: '#7c3aed' },
-  { label: 'Transit & Island Passes', value: 15, color: '#0f9f84' },
-  { label: 'Expense Receipts & Split Ledger', value: 12, color: '#f59e0b' },
+  {
+    title: 'Place Catalog',
+    value: '—',
+    subtitle: 'Places saved in the catalog',
+    icon: MapPin,
+    tone: 'green',
+    keywords: ['place catalog'],
+  },
 ]
 
 function getApiMetrics(dashboard, userCount) {
@@ -218,39 +119,52 @@ function KpiCard({ metric }) {
       </div>
       <div className="mission-kpi__value-line">
         <strong>{metric.value}</strong>
-        {metric.change ? <span className="mission-change"><ArrowUpRight size={13} />{metric.change}</span> : null}
       </div>
       <p>{metric.subtitle}</p>
     </article>
   )
 }
 
-function MetricStatusCard({ metric }) {
-  const Icon = metric.icon
-  return (
-    <article className="mission-status">
-      <span className={`mission-status__icon mission-status__icon--${metric.tone}`}><Icon size={17} /></span>
-      <div className="mission-status__content">
-        <span className="mission-eyebrow">{metric.label}</span>
-        <strong>{metric.value}</strong>
-      </div>
-      <span className={`mission-status__pill mission-status__pill--${metric.tone}`}>
-        <span className="mission-status__dot" />{metric.note}
-      </span>
-    </article>
+function ChartSection({ analytics }) {
+  const tripLifecycle = analytics?.trip_lifecycle
+  const ocrStats = analytics?.ocr_model_stats
+  const regions = tripLifecycle?.regions || []
+  const months = tripLifecycle?.months || []
+  const categories = ocrStats?.categories || []
+  const topDestinations = tripLifecycle?.top_destinations || []
+  const maxTrips = Math.max(
+    0,
+    ...months.map((month) =>
+      regions.reduce((total, region) => total + (month.regions?.[region.key]?.trips || 0), 0),
+    ),
   )
-}
-
-function ChartSection() {
-  const maxTotal = Math.max(...chartMonths.map((month) => month.sea + month.east + month.europe))
-  const gradient = `conic-gradient(${documentKinds
-    .reduce((acc, item) => {
-      const start = acc.end
-      const end = start + item.value * 3.6
-      acc.stops.push(`${item.color} ${start}deg ${end}deg`)
-      acc.end = end
-      return acc
-    }, { end: 0, stops: [] }).stops.join(', ')})`
+  const totalItineraryItems = months.reduce(
+    (total, month) =>
+      total + regions.reduce(
+        (monthTotal, region) =>
+          monthTotal + (month.regions?.[region.key]?.itinerary_items || 0),
+        0,
+      ),
+    0,
+  )
+  const axisStep = Math.max(1, Math.ceil(maxTrips / 3))
+  const axisMaximum = axisStep * 3
+  const numberFormat = new Intl.NumberFormat()
+  const compactFormat = new Intl.NumberFormat('en', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  })
+  const totalDocuments = ocrStats?.total_documents || 0
+  let gradientEnd = 0
+  const gradientStops = categories.map((category) => {
+    const start = gradientEnd
+    gradientEnd += (category.percentage || 0) * 3.6
+    return `${OCR_CATEGORY_COLORS[category.key] || OCR_CATEGORY_COLORS.other} ${start}deg ${gradientEnd}deg`
+  })
+  const gradient = totalDocuments
+    ? `conic-gradient(${gradientStops.join(', ')})`
+    : 'conic-gradient(#e2e8f0 0deg 360deg)'
+  const humanReviewRate = ocrStats?.human_review_rate
 
   return (
     <section className="mission-chart-grid" aria-label="Trip and OCR analytics">
@@ -259,30 +173,61 @@ function ChartSection() {
           <div>
             <div className="mission-heading-icon"><BarChart3 size={17} /></div>
             <h2>Trip Lifecycle Metrics</h2>
-            <p>Trip Creations &amp; Itinerary Volume <span className="mission-muted">· Jan–Jul 2026</span></p>
+            <p>Trip Creations &amp; Itinerary Volume <span className="mission-muted">· {tripLifecycle?.period?.label || 'No data'}</span></p>
           </div>
           <button className="mission-icon-button" type="button" aria-label="More trip metric options"><MoreHorizontal size={18} /></button>
         </div>
         <div className="mission-chart-legend">
-          <span><i className="mission-legend-dot mission-legend-dot--blue" />Southeast Asia</span>
-          <span><i className="mission-legend-dot mission-legend-dot--violet" />Japan &amp; East Asia</span>
-          <span><i className="mission-legend-dot mission-legend-dot--amber" />Europe &amp; UK</span>
+          {regions.map((region) => (
+            <span key={region.key}>
+              <i
+                className="mission-legend-dot"
+                style={{ backgroundColor: REGION_COLORS[region.key] || REGION_COLORS.other }}
+              />
+              {region.label}
+            </span>
+          ))}
         </div>
         <div className="mission-bar-chart">
-          <div className="mission-chart-y-axis"><span>3k</span><span>2k</span><span>1k</span><span>0</span></div>
+          <div className="mission-chart-y-axis">
+            {[3, 2, 1, 0].map((tick) => (
+              <span key={tick}>{compactFormat.format(axisStep * tick)}</span>
+            ))}
+          </div>
           <div className="mission-bar-chart__plot">
             {[0, 1, 2, 3].map((line) => <span key={line} className="mission-chart-gridline" style={{ bottom: `${line * 33.333}%` }} />)}
             <div className="mission-bars">
-              {chartMonths.map((month) => {
-                const total = month.sea + month.east + month.europe
+              {months.map((month) => {
+                const total = regions.reduce(
+                  (sum, region) => sum + (month.regions?.[region.key]?.trips || 0),
+                  0,
+                )
+                const itineraryItems = regions.reduce(
+                  (sum, region) => sum + (month.regions?.[region.key]?.itinerary_items || 0),
+                  0,
+                )
                 return (
-                  <div className="mission-bar-group" key={month.month} title={`${month.month}: ${total} itineraries`}>
-                    <div className="mission-stack" style={{ height: `${(total / maxTotal) * 100}%` }}>
-                      <span className="mission-stack__segment mission-stack__segment--amber" style={{ height: `${(month.europe / total) * 100}%` }} />
-                      <span className="mission-stack__segment mission-stack__segment--violet" style={{ height: `${(month.east / total) * 100}%` }} />
-                      <span className="mission-stack__segment mission-stack__segment--blue" style={{ height: `${(month.sea / total) * 100}%` }} />
+                  <div
+                    className="mission-bar-group"
+                    key={month.month}
+                    title={`${month.label}: ${numberFormat.format(total)} trips · ${numberFormat.format(itineraryItems)} itinerary items`}
+                  >
+                    <div className="mission-stack" style={{ height: `${(total / axisMaximum) * 100}%` }}>
+                      {[...regions].reverse().map((region) => {
+                        const regionTrips = month.regions?.[region.key]?.trips || 0
+                        return (
+                          <span
+                            className="mission-stack__segment"
+                            key={region.key}
+                            style={{
+                              backgroundColor: REGION_COLORS[region.key] || REGION_COLORS.other,
+                              height: `${total ? (regionTrips / total) * 100 : 0}%`,
+                            }}
+                          />
+                        )
+                      })}
                     </div>
-                    <span className="mission-bar-label">{month.month}</span>
+                    <span className="mission-bar-label">{month.label}</span>
                   </div>
                 )
               })}
@@ -291,8 +236,14 @@ function ChartSection() {
         </div>
         <div className="mission-insight">
           <span className="mission-insight__icon"><Sparkles size={16} /></span>
-          <p>Bangkok &amp; Tokyo continue as top cross-border anchors with <strong>+28%</strong> itinerary extensions.</p>
-          <button type="button" className="mission-link">View Detailed Ingest Logs <ArrowRight size={14} /></button>
+          <p>
+            {topDestinations.length
+              ? <>Top destinations by trip creations: <strong>{topDestinations.map(({ name, trips }) => `${name} (${numberFormat.format(trips)})`).join(' · ')}</strong></>
+              : 'No trips were created in this period.'}
+          </p>
+          <span className="mission-muted">
+            {numberFormat.format(totalItineraryItems)} itinerary items; hover over a bar for its monthly total.
+          </span>
         </div>
       </article>
 
@@ -301,51 +252,133 @@ function ChartSection() {
           <div>
             <div className="mission-heading-icon mission-heading-icon--violet"><FileCheck2 size={17} /></div>
             <h2>OCR Model Stats</h2>
-            <p>Parsed Document Split <span className="mission-muted">· 94,120 parsed tickets &amp; receipts</span></p>
+            <p>Parsed Document Split <span className="mission-muted">· {numberFormat.format(totalDocuments)} parsed documents</span></p>
           </div>
           <button className="mission-icon-button" type="button" aria-label="More OCR metric options"><MoreHorizontal size={18} /></button>
         </div>
         <div className="mission-donut-layout">
-          <div className="mission-donut" role="img" aria-label="Parsed document split: 42% flight boarding passes, 31% hotel and villa bookings, 15% transit and island passes, 12% expense receipts">
-            <div className="mission-donut__center"><strong>94.1k</strong><span>documents</span></div>
+          <div
+            className="mission-donut"
+            role="img"
+            aria-label={categories.length
+              ? `Parsed document split: ${categories.map((category) => `${category.label} ${category.percentage}%`).join(', ')}`
+              : 'No parsed documents'}
+          >
+            <div className="mission-donut__center"><strong>{compactFormat.format(totalDocuments)}</strong><span>documents</span></div>
             <div className="mission-donut__graphic" style={{ background: gradient }} />
           </div>
           <ul className="mission-donut-legend">
-            {documentKinds.map((kind) => (
-              <li key={kind.label}>
-                <span className="mission-legend-dot" style={{ backgroundColor: kind.color }} />
-                <span>{kind.label}</span>
-                <strong>{kind.value}%</strong>
+            {categories.map((category) => (
+              <li key={category.key}>
+                <span className="mission-legend-dot" style={{ backgroundColor: OCR_CATEGORY_COLORS[category.key] || OCR_CATEGORY_COLORS.other }} />
+                <span>{category.label} <small>({numberFormat.format(category.count)})</small></span>
+                <strong>{category.percentage}%</strong>
               </li>
             ))}
           </ul>
         </div>
-        <div className="mission-review-note"><ShieldCheck size={15} />Fallback Human Reviews: <strong>1.4%</strong></div>
+        <div className="mission-review-note">
+          <ShieldCheck size={15} />
+          Fallback Human Reviews:
+          <strong>{humanReviewRate === null || humanReviewRate === undefined ? '—' : `${humanReviewRate}%`}</strong>
+          <span className="mission-muted">
+            {numberFormat.format(ocrStats?.human_review_count || 0)} of {numberFormat.format(totalDocuments)} flagged
+          </span>
+        </div>
       </article>
     </section>
   )
 }
 
-function getIncident(record, index) {
-  const id = getValue(record, ['id', 'report_id', 'event_id'], `report-${index + 1}`)
-  const reporter = getValue(record, ['reporter_name', 'user_name', 'user_email', 'reporter_email', 'user_id'], 'Traveler')
-  const category = getValue(record, ['category', 'type', 'reason', 'report_type'], 'Content report')
+function getIncident(record) {
+  const id = getValue(record, ['id', 'report_id', 'event_id'])
+  const reporter = getValue(record, ['reporter_email', 'user_email', 'email'], '—')
+  const contentType = getValue(record, ['content_type', 'target_type', 'resource_type'])
+  const contentId = getValue(record, ['content_id', 'target_id', 'resource_id'])
   return {
     id,
-    place: getValue(record, ['place_name', 'destination_name', 'title', 'name'], `Reported place #${index + 1}`),
-    location: getValue(record, ['location', 'address', 'destination'], 'Location under review'),
-    category: String(category).replace(/[_-]+/g, ' '),
-    reporter: String(reporter).split('@')[0],
-    handle: getValue(record, ['reporter_handle', 'user_handle'], `@${String(reporter).split('@')[0].toLowerCase().replace(/\s+/g, '.')}`),
-    status: getValue(record, ['status', 'state'], 'Pending review'),
-    severity: getValue(record, ['severity', 'priority'], 'Medium'),
-    description: getValue(record, ['description', 'message', 'details', 'reason'], 'Review the submitted report and verify the latest traveler information.'),
+    place: `Report #${id}`,
+    location: [contentType, contentId ? `ID ${contentId}` : ''].filter(Boolean).join(' · ') || '—',
+    category: getValue(record, ['reason', 'title', 'description', 'message'], '—'),
+    reporter,
+    handle: reporter,
+    status: getValue(record, ['status', 'state'], 'Unknown'),
+    description: getValue(record, ['resolution', 'review_notes'], ''),
   }
 }
 
+function CatalogOverview({
+  destinationItems,
+  destinationTotal,
+  destinationError,
+  placeItems,
+  placeTotal,
+  placeError,
+}) {
+  return (
+    <section className="mission-chart-grid" aria-label="Saved destinations and places">
+      <article className="mission-card">
+        <div className="mission-table-toolbar">
+          <div>
+            <h2>Saved destinations</h2>
+            <p>{destinationTotal.toLocaleString()} destinations in the catalog</p>
+          </div>
+        </div>
+        {destinationError ? <p className="mission-api-note" role="alert">Unable to load destinations: {destinationError}</p> : null}
+        <div className="mission-table-scroll">
+          <table className="mission-table">
+            <thead>
+              <tr><th>Destination</th><th>Country</th><th>Saved</th></tr>
+            </thead>
+            <tbody>
+              {destinationItems.map((destination) => (
+                <tr key={destination.id}>
+                  <td><strong>{destination.name}</strong></td>
+                  <td>{destination.country} ({destination.country_code})</td>
+                  <td>{destination.created_at ? new Date(destination.created_at).toLocaleDateString() : '—'}</td>
+                </tr>
+              ))}
+              {destinationItems.length === 0 ? (
+                <tr><td className="mission-no-results" colSpan="3">{destinationError ? 'Destinations are unavailable.' : 'No destinations have been saved.'}</td></tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article className="mission-card">
+        <div className="mission-table-toolbar">
+          <div>
+            <h2>Saved places</h2>
+            <p>{placeTotal.toLocaleString()} places in the catalog</p>
+          </div>
+        </div>
+        {placeError ? <p className="mission-api-note" role="alert">Unable to load places: {placeError}</p> : null}
+        <div className="mission-table-scroll">
+          <table className="mission-table">
+            <thead>
+              <tr><th>Place</th><th>Category</th><th>Destination ID</th></tr>
+            </thead>
+            <tbody>
+              {placeItems.map((place) => (
+                <tr key={place.id}>
+                  <td><strong>{place.name}</strong></td>
+                  <td>{place.category}</td>
+                  <td>{place.destination_id}</td>
+                </tr>
+              ))}
+              {placeItems.length === 0 ? (
+                <tr><td className="mission-no-results" colSpan="3">{placeError ? 'Places are unavailable.' : 'No places have been saved.'}</td></tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+  )
+}
+
 function IncidentTable({
-  activeTab,
-  onActiveTabChange,
   onPageChange,
   onReportReview,
   pendingReportId,
@@ -358,17 +391,9 @@ function IncidentTable({
   const [statusFilter, setStatusFilter] = useState('all')
   const [showFilters, setShowFilters] = useState(false)
   const [expandedId, setExpandedId] = useState('')
-  const isReports = activeTab === 'reports'
-  const hasApiReports = isReports && reportItems.length > 0
   const rows = useMemo(
-    () => (
-      hasApiReports
-        ? reportItems.map((record, index) => ({ ...getIncident(record, index), source: record }))
-        : isReports
-          ? sampleIncidents
-          : sampleOversight
-    ),
-    [hasApiReports, isReports, reportItems],
+    () => reportItems.map((record) => ({ ...getIncident(record), source: record })),
+    [reportItems],
   )
   const filteredRows = rows.filter((row) => {
     const searchMatch = `${row.place} ${row.location} ${row.id} ${row.reporter} ${row.category}`
@@ -377,48 +402,25 @@ function IncidentTable({
     const statusMatch = statusFilter === 'all' || row.status.toLowerCase().includes(statusFilter)
     return searchMatch && statusMatch
   })
-  const apiTotal = isReports && hasApiReports ? reportTotal : 32
-  const pages = Math.max(1, Math.ceil(apiTotal / 4))
-  const from = apiTotal === 0 ? 0 : (reportPage - 1) * 4 + 1
-  const to = Math.min(reportPage * 4, apiTotal)
-  const hasRecordId = (id) => !String(id).startsWith('report-')
+  const pages = Math.max(1, Math.ceil(reportTotal / 4))
+  const from = reportTotal === 0 ? 0 : (reportPage - 1) * 4 + 1
+  const to = Math.min(reportPage * 4, reportTotal)
 
   return (
     <section className="mission-card mission-incidents">
-      <div className="mission-tabs" role="tablist" aria-label="Admin oversight sections">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={isReports}
-          className={isReports ? 'is-active' : ''}
-          onClick={() => onActiveTabChange('reports')}
-        >
-          Recent Content Reports &amp; Flagged Places
-          <span className="mission-tab-count">3 Pending</span>
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={!isReports}
-          className={!isReports ? 'is-active' : ''}
-          onClick={() => onActiveTabChange('oversight')}
-        >
-          Curated Destinations Oversight &amp; Alerts
-        </button>
-      </div>
       <div className="mission-table-toolbar">
         <div>
-          <h2>{isReports ? 'Traveler-submitted incidents' : 'Catalog integrity queue'}</h2>
-          <p>{hasApiReports ? `${reportTotal.toLocaleString()} reports from the admin API` : 'Example incident data'} <span className="mission-muted">· Last synced just now</span></p>
+          <h2>Traveler-submitted reports</h2>
+          <p>{reportTotal.toLocaleString()} reports</p>
         </div>
         <div className="mission-table-tools">
           <label className="mission-search">
             <Search size={16} aria-hidden="true" />
-            <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Filter by location..." aria-label="Filter by location" />
+            <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Filter reports..." aria-label="Filter reports" />
             {search ? <button type="button" onClick={() => setSearch('')} aria-label="Clear search"><X size={14} /></button> : null}
           </label>
           <button type="button" className={`mission-filter-button ${showFilters ? 'is-selected' : ''}`} onClick={() => setShowFilters((visible) => !visible)}>
-            <SlidersHorizontal size={15} />Report ID / EV
+            <SlidersHorizontal size={15} />Filters
           </button>
         </div>
       </div>
@@ -428,20 +430,21 @@ function IncidentTable({
           <select id="incident-status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
             <option value="all">All statuses</option>
             <option value="pending">Pending review</option>
-            <option value="verified">Verified &amp; ready</option>
+            <option value="in_review">In review</option>
+            <option value="resolved">Resolved</option>
           </select>
-          <span>Filter by incident status</span>
+          <span>Filter reports by status</span>
         </div>
       ) : null}
-      {reportError && isReports ? <p className="mission-api-note" role="status">Live reports unavailable: {reportError}. Showing sample rows.</p> : null}
+      {reportError ? <p className="mission-api-note" role="alert">Unable to load reports: {reportError}</p> : null}
       <div className="mission-table-scroll">
         <table className="mission-table">
           <thead>
             <tr>
-              <th>Place / itinerary reference</th>
+              <th>Report</th>
               <th>Reported by</th>
-              <th>Incident category</th>
-              <th>Severity &amp; status</th>
+              <th>Reason</th>
+              <th>Status</th>
               <th>Admin actions</th>
             </tr>
           </thead>
@@ -453,25 +456,21 @@ function IncidentTable({
                 <tr key={row.id}>
                   <td>
                     <div className="mission-place">
-                      <span className="mission-place__icon">{row.id.startsWith('DST') ? <Building2 size={16} /> : <MapPin size={16} />}</span>
+                      <span className="mission-place__icon"><MapPin size={16} /></span>
                       <span><strong>{row.place}</strong><small>{row.location} <span>·</span> {row.id}</small></span>
                     </div>
-                    {isExpanded ? <p className="mission-row-details">{row.description}</p> : null}
+                    {isExpanded && row.description ? <p className="mission-row-details">{row.description}</p> : null}
                   </td>
                   <td>
                     <div className="mission-reporter">
                       <span className="mission-avatar">{getInitials(row.reporter)}</span>
-                      <span><strong>{row.reporter}</strong><small>{row.handle}</small></span>
+                      <span><strong>{row.reporter}</strong></span>
                     </div>
                   </td>
                   <td><span className="mission-category">{row.category}</span></td>
                   <td>
-                    <span className={`mission-severity mission-severity--${String(row.severity).toLowerCase()}`}>
-                      {String(row.severity).toLowerCase() === 'high' ? <ArrowUpRight size={12} /> : String(row.severity).toLowerCase() === 'low' ? <ArrowDownRight size={12} /> : null}
-                      {row.severity}
-                    </span>
-                    <span className={`mission-status-tag ${String(row.status).toLowerCase().includes('verified') ? 'mission-status-tag--ready' : 'mission-status-tag--pending'}`}>
-                      {String(row.status).toLowerCase().includes('verified') ? <Check size={11} /> : <span className="mission-status__dot" />}
+                    <span className={`mission-status-tag ${String(row.status).toLowerCase() === 'resolved' ? 'mission-status-tag--ready' : 'mission-status-tag--pending'}`}>
+                      {String(row.status).toLowerCase() === 'resolved' ? <Check size={11} /> : <span className="mission-status__dot" />}
                       {row.status}
                     </span>
                   </td>
@@ -480,12 +479,12 @@ function IncidentTable({
                       <button type="button" className="mission-action-link" onClick={() => setExpandedId(isExpanded ? '' : row.id)}>
                         {isExpanded ? 'Close' : 'Inspect'}
                       </button>
-                      {record && hasRecordId(row.id) ? (
+                      {record ? (
                         <details className="mission-review">
                           <summary className="mission-action-link">Review</summary>
                           <form className="mission-review__form" onSubmit={(event) => onReportReview(event, row.id)}>
                             <label>Status
-                              <select name="status" defaultValue={String(row.status).toLowerCase().includes('verified') ? 'resolved' : 'in_review'}>
+                              <select name="status" defaultValue={row.status}>
                                 <option value="pending">Pending review</option>
                                 <option value="in_review">In review</option>
                                 <option value="resolved">Resolved</option>
@@ -499,25 +498,26 @@ function IncidentTable({
                             </button>
                           </form>
                         </details>
-                      ) : <button type="button" className="mission-action-link mission-action-link--muted" title="Available for live report records">Flag</button>}
+                      ) : null}
                     </div>
                   </td>
                 </tr>
               )
             })}
             {filteredRows.length === 0 ? (
-              <tr><td className="mission-no-results" colSpan="5">No reports match this filter.</td></tr>
+              <tr>
+                <td className="mission-no-results" colSpan="5">
+                  {reportError ? 'Reports are unavailable.' : search || statusFilter !== 'all' ? 'No reports match this filter.' : 'No reports have been submitted.'}
+                </td>
+              </tr>
             ) : null}
           </tbody>
         </table>
       </div>
       <footer className="mission-table-footer">
-        <span>Showing {from}–{to} of {apiTotal.toLocaleString()} items</span>
+        <span>Showing {from}–{to} of {reportTotal.toLocaleString()} reports</span>
         <div className="mission-pagination">
           <button type="button" aria-label="Previous page" disabled={reportPage <= 1} onClick={() => onPageChange(reportPage - 1)}><ChevronLeft size={16} /></button>
-          {[1, 2, 3].map((page) => (
-            <button type="button" key={page} className={reportPage === page ? 'is-current' : ''} onClick={() => onPageChange(page)}>{page}</button>
-          ))}
           <button type="button" onClick={() => onPageChange(Math.min(pages, reportPage + 1))} disabled={reportPage >= pages}>Next <ChevronRight size={14} /></button>
         </div>
       </footer>
@@ -525,39 +525,12 @@ function IncidentTable({
   )
 }
 
-function SystemHealth() {
-  const [safetyLock, setSafetyLock] = useState(false)
-  return (
-    <section className="mission-health" aria-label="System health">
-      <article className="mission-health-card">
-        <span className="mission-health-icon mission-health-icon--blue"><Database size={17} /></span>
-        <div><strong>Warm Redis Cache</strong><p>2.02B key/value entries active</p></div>
-        <button type="button" className="mission-flush-button" disabled title="Cache flush is not connected to an API endpoint">Flush Cache</button>
-      </article>
-      <article className="mission-health-card">
-        <span className="mission-health-icon mission-health-icon--green"><TicketCheck size={17} /></span>
-        <div><strong>OCR Parser v4.3-1C</strong><p>Precision &amp; accuracy 98.9%</p></div>
-        <span className="mission-health-badge">Keying 100%</span>
-      </article>
-      <article className="mission-health-card">
-        <span className="mission-health-icon mission-health-icon--amber"><ShieldCheck size={17} /></span>
-        <div><strong>Read-Only Safety Lock</strong><p>Prevent write lock collisions</p></div>
-        <button
-          type="button"
-          className={`mission-switch ${safetyLock ? 'is-on' : ''}`}
-          role="switch"
-          aria-checked={safetyLock}
-          aria-label="Toggle read-only safety lock"
-          onClick={() => setSafetyLock((enabled) => !enabled)}
-        ><span /></button>
-        <span className="mission-switch-label">{safetyLock ? 'Enabled' : 'Disabled'}</span>
-      </article>
-    </section>
-  )
-}
-
 function DashboardAnalytics({
+  analytics,
   dashboard,
+  destinationItems = [],
+  destinationTotal = 0,
+  destinationError = '',
   onRefresh,
   onReportPageChange,
   onReportReview,
@@ -566,18 +539,18 @@ function DashboardAnalytics({
   reportItems = [],
   reportPage = 1,
   reportTotal = 0,
+  placeItems = [],
+  placeTotal = 0,
+  placeError = '',
   userCount,
 }) {
-  const [period, setPeriod] = useState('Last 7 Days')
-  const [activeIncidentTab, setActiveIncidentTab] = useState('reports')
+  const [activeDashboardSection, setActiveDashboardSection] = useState('reports')
   const apiMetrics = getApiMetrics(dashboard, userCount)
-  const metrics = kpiDefinitions.map((metric, index) => {
+  const metrics = kpiDefinitions.map((metric) => {
     const apiValue = findMetric(apiMetrics, metric.keywords)
     return {
       ...metric,
-      value: index === 0 && userCount !== undefined
-        ? new Intl.NumberFormat().format(userCount)
-        : apiValue ?? metric.value,
+      value: apiValue ?? metric.value,
     }
   })
 
@@ -585,55 +558,66 @@ function DashboardAnalytics({
     <div className="mission-control flex flex-col gap-4">
       <section className="mission-toolbar">
         <div className="mission-badges">
-          <span className="mission-prod-badge"><span />PROD-cluster A-2</span>
-          <span className="mission-latency"><Activity size={13} />Latency <strong>41ms</strong></span>
-          <span className="mission-sample-label">Illustrative telemetry</span>
+          <span className="mission-prod-badge"><span />Live database metrics</span>
         </div>
         <div className="mission-toolbar__actions">
-          <div className="mission-periods" role="group" aria-label="Dashboard date range">
-            {['Last 7 Days', 'Last 30 Days', 'Year to Date'].map((item) => (
-              <button type="button" key={item} className={period === item ? 'is-active' : ''} onClick={() => setPeriod(item)}>{item}</button>
-            ))}
-          </div>
-          <label className="mission-cluster">
-            <span>Cluster:</span>
-            <select aria-label="Select cluster" defaultValue="ap-southeast-1">
-              <option value="ap-southeast-1">AP-Southeast-1</option>
-              <option value="ap-northeast-1">AP-Northeast-1</option>
-              <option value="eu-west-1">EU-West-1</option>
-            </select>
-            <ChevronDown size={14} />
-          </label>
           <button type="button" className="mission-sync-button" onClick={onRefresh}>
-            <RefreshCw size={15} />Sync Pipelines
+            <RefreshCw size={15} />Refresh data
           </button>
         </div>
-      </section>
-
-      <section className="mission-status-grid grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4" aria-label="System status metrics">
-        {statusMetrics.map((metric) => <MetricStatusCard key={metric.label} metric={metric} />)}
       </section>
 
       <section className="mission-kpi-grid grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4" aria-label="Key performance indicators">
         {metrics.map((metric) => <KpiCard metric={metric} key={metric.title} />)}
       </section>
 
-      <ChartSection />
+      <ChartSection analytics={analytics} />
 
-      <IncidentTable
-        activeTab={activeIncidentTab}
-        onActiveTabChange={setActiveIncidentTab}
-        onPageChange={onReportPageChange}
-        onReportReview={onReportReview}
-        pendingReportId={pendingReportId}
-        reportError={reportError}
-        reportItems={reportItems}
-        reportPage={reportPage}
-        reportTotal={reportTotal}
-      />
+      <section className="mission-card mission-incidents">
+        <div className="mission-tabs" role="tablist" aria-label="Saved dashboard data">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeDashboardSection === 'reports'}
+            className={activeDashboardSection === 'reports' ? 'is-active' : ''}
+            onClick={() => setActiveDashboardSection('reports')}
+          >
+            Reports <span className="mission-tab-count">{reportTotal.toLocaleString()}</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeDashboardSection === 'catalog'}
+            className={activeDashboardSection === 'catalog' ? 'is-active' : ''}
+            onClick={() => setActiveDashboardSection('catalog')}
+          >
+            Saved destinations &amp; places
+            <span className="mission-tab-count">{(destinationTotal + placeTotal).toLocaleString()}</span>
+          </button>
+        </div>
+        {activeDashboardSection === 'reports' ? (
+          <IncidentTable
+            onPageChange={onReportPageChange}
+            onReportReview={onReportReview}
+            pendingReportId={pendingReportId}
+            reportError={reportError}
+            reportItems={reportItems}
+            reportPage={reportPage}
+            reportTotal={reportTotal}
+          />
+        ) : (
+          <CatalogOverview
+            destinationItems={destinationItems}
+            destinationTotal={destinationTotal}
+            destinationError={destinationError}
+            placeItems={placeItems}
+            placeTotal={placeTotal}
+            placeError={placeError}
+          />
+        )}
+      </section>
 
-      <SystemHealth />
-      <div className="mission-footer"><Cloud size={14} />Platform telemetry is illustrative; traveler counts and report rows are sourced from the admin API when available.</div>
+      <div className="mission-footer"><Cloud size={14} />Dashboard values are loaded from persisted backend records.</div>
     </div>
   )
 }

@@ -22,7 +22,9 @@ function AdminContent({
   onRefresh,
   onSearch,
   onUserPageChange,
+  onUserDelete,
   onUserStatusChange,
+  pendingDeleteUserId,
   pendingReportId,
   pendingUserId,
   placeRefreshKey,
@@ -35,6 +37,13 @@ function AdminContent({
     return (
       <DashboardAnalytics
         dashboard={data?.dashboard}
+        analytics={data?.analytics}
+        destinationItems={data?.destinationItems}
+        destinationTotal={data?.destinationTotal}
+        destinationError={data?.destinationError}
+        placeItems={data?.placeItems}
+        placeTotal={data?.placeTotal}
+        placeError={data?.placeError}
         onRefresh={onRefresh}
         onReportPageChange={onReportPageChange}
         onReportReview={onReportReview}
@@ -82,8 +91,10 @@ function AdminContent({
         onFilterChange={onFilterChange}
         onPageChange={onUserPageChange}
         onSearch={onSearch}
+        onDelete={onUserDelete}
         onStatusChange={onUserStatusChange}
         page={userPage}
+        pendingDeleteUserId={pendingDeleteUserId}
         pendingUserId={pendingUserId}
         searchInput={searchInput}
         setSearchInput={setSearchInput}

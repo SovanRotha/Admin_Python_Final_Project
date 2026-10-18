@@ -19,6 +19,9 @@ export const authRegister = (payload) =>
 
 export const fetchAdminDashboard = () => request(`${ADMIN_ENDPOINT}/dashboard`)
 
+export const fetchAdminDashboardAnalytics = () =>
+  request(`${ADMIN_ENDPOINT}/dashboard/analytics`)
+
 export const fetchAdminUserCount = () => request(`${ADMIN_ENDPOINT}/users/count`)
 
 export const fetchAdminUsers = (params = {}) =>
@@ -31,6 +34,11 @@ export const updateAdminUserStatus = (userId, status) =>
   request(`${ADMIN_ENDPOINT}/users/${encodeURIComponent(userId)}`, {
     method: 'PATCH',
     body: { status },
+  })
+
+export const deleteAdminUser = (userId) =>
+  request(`${ADMIN_ENDPOINT}/users/${encodeURIComponent(userId)}`, {
+    method: 'DELETE',
   })
 
 export const fetchAdminReports = (params = {}) =>
@@ -99,10 +107,12 @@ const adminApi = {
   login: authLogin,
   register: authRegister,
   getDashboard: fetchAdminDashboard,
+  getDashboardAnalytics: fetchAdminDashboardAnalytics,
   getUserCount: fetchAdminUserCount,
   listUsers: fetchAdminUsers,
   getUserById: fetchAdminUserById,
   updateUserStatus: updateAdminUserStatus,
+  deleteUser: deleteAdminUser,
   listReports: fetchAdminReports,
   reviewReport: reviewAdminReport,
   getSettings: fetchAdminSettings,

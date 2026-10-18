@@ -1,4 +1,5 @@
 ﻿const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')
+const UNAUTHORIZED_EVENT = 'admin:unauthorized'
 
 const getStoredToken = () => {
   try {
@@ -90,6 +91,16 @@ export async function request(path, { query, body, ...options } = {}) {
 
   if (!response.ok) {
     const message = formatApiError(payload)
+
+    if (response.status === 401 && !path.startsWith('/api/v1/auth/')) {
+      try {
+        localStorage.removeItem('admin_token')
+        localStorage.removeItem('access_token')
+      } catch (storageError) {
+        console.error('Could not clear invalid admin credentials:', storageError)
+      }
+      window.dispatchEvent(new Event(UNAUTHORIZED_EVENT))
+    }
 
     throw new Error(message || `Request failed (${response.status} ${response.statusText})`)
   }

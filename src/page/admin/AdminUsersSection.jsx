@@ -14,8 +14,10 @@ function AdminUsersSection({
   onFilterChange,
   onPageChange,
   onSearch,
+  onDelete,
   onStatusChange,
   page,
+  pendingDeleteUserId,
   pendingUserId,
   searchInput,
   setSearchInput,
@@ -91,10 +93,18 @@ function AdminUsersSection({
                     <button
                       type="button"
                       className={`adm-btn adm-btn--small ${isActive ? 'adm-btn--danger' : 'adm-btn--success'}`}
-                      disabled={pendingUserId === userId || userId.toString().startsWith('row-')}
+                      disabled={pendingUserId === userId || pendingDeleteUserId === userId || userId.toString().startsWith('row-')}
                       onClick={() => onStatusChange(user, isActive ? 'suspended' : 'active')}
                     >
                       {pendingUserId === userId ? 'Saving…' : isActive ? 'Suspend' : 'Activate'}
+                    </button>
+                    <button
+                      type="button"
+                      className="adm-btn adm-btn--small adm-btn--danger"
+                      disabled={pendingUserId === userId || pendingDeleteUserId === userId || userId.toString().startsWith('row-')}
+                      onClick={() => onDelete(user)}
+                    >
+                      {pendingDeleteUserId === userId ? 'Deleting…' : 'Delete'}
                     </button>
                   </td>
                 </tr>
